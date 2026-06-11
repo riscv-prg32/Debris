@@ -51,5 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# PRG32 cartridge build output
+dist/
+
 # debug information files
 *.dwo

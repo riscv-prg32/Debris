@@ -1,0 +1,28 @@
+{
+  "abi": "prg32-metadata-1.0",
+  "id": "org.uniparthenope.prg32.debris",
+  "title": "Debris",
+  "version": "1.0.0",
+  "summary": "A fully playable multi-level falling-block puzzle game for PRG32.",
+  "tags": [
+    "game",
+    "puzzle",
+    "arcade",
+    "riscv",
+    "prg32"
+  ],
+  "assets": {
+    "icon": "icon.png",
+    "splash": "screenshot.png"
+  },
+  "architectures": [
+    {
+      "id": "esp32c6",
+      "file": "debris-esp32c6.prg32"
+    },
+    {
+      "id": "qemu",
+      "file": "debris-qemu.prg32"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "abi": "prg32-metadata-1.0",
+  "id": "org.uniparthenope.prg32.debris",
+  "title": "Debris",
+  "version": "1.0.0",
+  "summary": "A fully playable multi-level falling-block puzzle game for PRG32.",
+  "description": "Debris is a Tetris-inspired PRG32 cartridge with player-controlled movement, rotation, hard and soft drops, hold, next-piece queue, scoring, line clears, pause, game-over restart, and speed that increases across levels. Graphics are procedural geometric blocks and the sound effects are synthesized/generated in code.",
+  "authors": [
+    {
+      "name": "Raffaele Montella",
+      "affiliation": "UniParthenope"
+    },
+    {
+      "name": "Ivan Cafiero",
+      "affiliation": "UniParthenope"
+    },
+    {
+      "name": "Simone Boscaglia",
+      "affiliation": "UniParthenope"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/riscv-prg32/Debris",
+  "repository": "https://github.com/riscv-prg32/Debris",
+  "tags": [
+    "game",
+    "puzzle",
+    "arcade",
+    "riscv",
+    "prg32"
+  ],
+  "created_at": "2026-06-11T00:00:00Z",
+  "updated_at": "2026-06-11T00:00:00Z",
+  "runtime": {
+    "platform": "PRG32",
+    "isa": "RV32I",
+    "architecture": "esp32c6",
+    "architectures": [
+      {
+        "id": "esp32c6",
+        "label": "ESP32-C6 hardware",
+        "target": "esp32c6",
+        "display": "ili9341",
+        "isa": "RV32I"
+      },
+      {
+        "id": "qemu",
+        "label": "QEMU virtual screen",
+        "target": "esp32c3",
+        "display": "qemu-rgb",
+        "isa": "RV32I"
+      }
+    ]
+  },
+  "assets": {
+    "icon": {
+      "block": "ICON",
+      "mime": "image/png"
+    },
+    "screenshot": {
+      "block": "SCRN",
+      "mime": "image/png",
+      "optional": true
+    }
+  },
+  "colophon": {
+    "block": "COLO",
+    "abi": "prg32-colophon-1.0"
+  }
+}

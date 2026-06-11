@@ -1,0 +1,57 @@
+{
+  "abi": "prg32-colophon-1.0",
+  "title": "Debris",
+  "subtitle": "A multi-level falling-block puzzle game",
+  "version": "1.0.0",
+  "release_date": "2026-06-11",
+  "developer": {
+    "name": "UniParthenope PRG32",
+    "url": "https://github.com/riscv-prg32/Debris"
+  },
+  "authors": [
+    {
+      "role": "academic supervisor / project lead",
+      "name": "Raffaele Montella - UniParthenope"
+    },
+    {
+      "role": "computer science student",
+      "name": "Ivan Cafiero - UniParthenope"
+    },
+    {
+      "role": "computer science student",
+      "name": "Simone Boscaglia - UniParthenope"
+    }
+  ],
+  "license": "MIT",
+  "copyright": "Copyright 2026 UniParthenope PRG32 contributors",
+  "acknowledgements": [
+    "Original procedural graphics and generated sound effects. No third-party copyrighted art or audio assets are used."
+  ],
+  "controls": [
+    {
+      "input": "LEFT / RIGHT",
+      "action": "Move the falling piece"
+    },
+    {
+      "input": "A",
+      "action": "Rotate clockwise"
+    },
+    {
+      "input": "UP",
+      "action": "Hard drop"
+    },
+    {
+      "input": "DOWN",
+      "action": "Soft drop"
+    },
+    {
+      "input": "B",
+      "action": "Hold or swap the current piece"
+    },
+    {
+      "input": "SELECT",
+      "action": "Start, pause, resume, or restart"
+    }
+  ],
+  "start_prompt": "Press SELECT to start"
+}
