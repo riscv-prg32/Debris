@@ -33,3 +33,8 @@ scripts/build.sh
 ```
 
 The output cartridge is written to `dist/debris-esp32c6.prg32`.
+
+## Documentation
+
+- [Build and publish guide](docs/build-and-publish.md)
+- [Step-by-step teaching tutorial](docs/teaching-tutorial.md)
