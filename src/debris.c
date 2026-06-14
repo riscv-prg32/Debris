@@ -8,6 +8,7 @@
 #define PREVIEW_X 204
 #define HOLD_X 28
 #define FALL_FRAMES_BASE 34
+#define GAME_ID "debris"
 
 typedef enum {
     STATE_TITLE,
@@ -32,6 +33,8 @@ typedef struct {
     uint8_t level;
     uint8_t state;
     uint8_t audio_ready;
+    uint8_t score_submitted;
+    uint8_t score_submit_ok;
     uint8_t clear_flash;
     uint8_t drop_timer;
     uint8_t lock_delay;
@@ -105,6 +108,13 @@ static void make_line(char *dst, int cap, const char *label, uint32_t value) {
     append_uint(dst, cap, &pos, value, 1);
 }
 
+static void submit_score_once(void) {
+    if (g.score_submitted) return;
+    g.score_submitted = 1;
+    prg32_score_player_prompt();
+    g.score_submit_ok = (prg32_score_submit_current_player(GAME_ID, g.score) == 0);
+}
+
 static uint32_t rnd(void) {
     g.rng = g.rng * 1664525u + 1013904223u;
     return g.rng;
@@ -147,6 +157,7 @@ static void spawn(void) {
     g.lock_delay = 0;
     if (!fits(g.piece, g.rot, g.x, g.y)) {
         g.state = STATE_GAME_OVER;
+        submit_score_once();
         sound_sample(crackle_sample, sizeof(crackle_sample), 11025);
     }
 }
@@ -159,6 +170,8 @@ static void reset_game(void) {
     g.score = 0;
     g.lines = 0;
     g.level = 1;
+    g.score_submitted = 0;
+    g.score_submit_ok = 0;
     g.hold = -1;
     g.hold_used = 0;
     g.clear_flash = 0;
@@ -335,6 +348,35 @@ static void draw_stats(void) {
     for (int n = 0; n < 3; ++n) draw_piece(g.queue[n], 0, PREVIEW_X, 92 + n * 30, 6);
 }
 
+static void draw_top_scores(int x, int y, uint16_t bg) {
+    prg32_gfx_text8(x, y, "LOCAL TOP 5", PRG32_COLOR_CYAN, bg);
+    int count = prg32_score_count(GAME_ID);
+    if (count <= 0) {
+        prg32_gfx_text8(x, y + 14, "NO SCORES YET", PRG32_COLOR_WHITE, bg);
+        return;
+    }
+    if (count > 5) count = 5;
+    for (int i = 0; i < count; ++i) {
+        prg32_score_t record;
+        char rank[3];
+        char player[11];
+        char score_line[16];
+        if (prg32_score_get(GAME_ID, i, &record) != 0) break;
+        for (uint8_t j = 0; j < 10; ++j) {
+            player[j] = record.player[j];
+            if (!player[j]) break;
+        }
+        player[10] = '\0';
+        rank[0] = (char)('1' + i);
+        rank[1] = '.';
+        rank[2] = '\0';
+        make_line(score_line, sizeof(score_line), "", record.score);
+        prg32_gfx_text8(x, y + 14 + i * 12, rank, PRG32_COLOR_WHITE, bg);
+        prg32_gfx_text8(x + 20, y + 14 + i * 12, player, PRG32_COLOR_WHITE, bg);
+        prg32_gfx_text8(x + 122, y + 14 + i * 12, score_line, PRG32_COLOR_YELLOW, bg);
+    }
+}
+
 static void draw_board(void) {
     uint16_t frame_color = g.clear_flash ? PRG32_COLOR_WHITE : PRG32_COLOR_BLUE;
     prg32_gfx_rect(BOARD_X - 4, BOARD_Y - 4, BOARD_W * CELL + 8, BOARD_H * CELL + 8, frame_color);
@@ -372,14 +414,14 @@ static void draw_game(void) {
 
 static void draw_title(void) {
     prg32_gfx_clear(PRG32_COLOR_BLACK);
-    prg32_gfx_text8(72, 42, "DEBRIS", PRG32_COLOR_YELLOW, PRG32_COLOR_BLACK);
-    prg32_gfx_text8(48, 66, "A MULTI LEVEL BLOCK GAME", PRG32_COLOR_CYAN, PRG32_COLOR_BLACK);
+    prg32_gfx_text8(72, 22, "DEBRIS", PRG32_COLOR_YELLOW, PRG32_COLOR_BLACK);
+    prg32_gfx_text8(48, 44, "A MULTI LEVEL BLOCK GAME", PRG32_COLOR_CYAN, PRG32_COLOR_BLACK);
     for (int i = 0; i < 7; ++i) {
-        draw_piece(i, (g.frame / 18u + (uint32_t)i) & 3u, 46 + i * 30, 104 + (i & 1) * 10, 6);
+        draw_piece(i, (g.frame / 18u + (uint32_t)i) & 3u, 46 + i * 30, 70 + (i & 1) * 8, 6);
     }
-    prg32_gfx_text8(56, 154, "SELECT STARTS", PRG32_COLOR_WHITE, PRG32_COLOR_BLACK);
-    prg32_gfx_text8(24, 174, "LEFT/RIGHT MOVE  A ROTATE", PRG32_COLOR_GREEN, PRG32_COLOR_BLACK);
-    prg32_gfx_text8(24, 188, "UP DROP  DOWN SOFT  B HOLD", PRG32_COLOR_GREEN, PRG32_COLOR_BLACK);
+    draw_top_scores(58, 106, PRG32_COLOR_BLACK);
+    prg32_gfx_text8(56, 178, "SELECT STARTS", PRG32_COLOR_WHITE, PRG32_COLOR_BLACK);
+    prg32_gfx_text8(24, 190, "LEFT/RIGHT MOVE  A ROTATE", PRG32_COLOR_GREEN, PRG32_COLOR_BLACK);
 }
 
 static void draw_game_over(void) {
@@ -389,7 +431,9 @@ static void draw_game_over(void) {
     char line[32];
     make_line(line, sizeof(line), "FINAL ", g.score);
     prg32_gfx_text8(88, 102, line, PRG32_COLOR_WHITE, 0x2104);
-    prg32_gfx_text8(72, 118, "SELECT RESTARTS", PRG32_COLOR_YELLOW, 0x2104);
+    prg32_gfx_text8(72, 118, g.score_submit_ok ? "SCOREBOARD OK" : "SCOREBOARD OFF", PRG32_COLOR_CYAN, 0x2104);
+    draw_top_scores(72, 138, PRG32_COLOR_BLACK);
+    prg32_gfx_text8(72, 190, "SELECT RESTARTS", PRG32_COLOR_YELLOW, PRG32_COLOR_BLACK);
 }
 
 void debris_init(void) {
