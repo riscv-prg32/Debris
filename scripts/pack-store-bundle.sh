@@ -13,8 +13,8 @@ cp "$repo_dir/assets/screenshot.png" "$stage_dir/screenshot.png"
 cp "$repo_dir/dist/debris-esp32c6.prg32" "$stage_dir/debris-esp32c6.prg32"
 cp "$repo_dir/dist/debris-qemu.prg32" "$stage_dir/debris-qemu.prg32"
 
-python3 "$prg32_repo/tools/prg32_game.py" pack-bundle \
+(cd "$prg32_repo" && python3 -m prg32 store pack-bundle \
   --manifest "$stage_dir/manifest.json" \
-  --out "$repo_dir/dist/debris-store-bundle.zip"
+  --out "$repo_dir/dist/debris-store-bundle.zip")
 
 echo "$repo_dir/dist/debris-store-bundle.zip"
