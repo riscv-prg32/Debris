@@ -78,7 +78,7 @@ For device deployment:
 export PRG32_ARCHITECTURE=esp32c6
 scripts/build.sh
 
-python3 "$PRG32_REPO/tools/prg32_game.py" upload \
+PYTHONPATH="$PRG32_REPO" python3 -m prg32 esp32c6 upload \
   dist/debris-esp32c6.prg32 \
   --url http://192.168.4.1
 ```
@@ -238,12 +238,13 @@ architecture="${PRG32_ARCHITECTURE:-qemu}"
 
 mkdir -p "$repo_dir/dist"
 
-python3 "$prg32_repo/tools/prg32_game.py" build \
+(cd "$prg32_repo" && python3 -m prg32 cartridge build \
   "$repo_dir/src/debris.c" \
   --entry-prefix debris \
   --name debris \
+  --architecture "$architecture" \
   --portable \
-  --out "$repo_dir/dist/debris-$architecture.prg32"
+  --out "$repo_dir/dist/debris-$architecture.prg32")
 ```
 
 **Expected product:** A cartridge that builds and shows a title screen.
@@ -1398,8 +1399,6 @@ prg32_repo="${PRG32_REPO:-"$repo_dir/../PRG32"}"
 firmware_elf="${1:-"${PRG32_FIRMWARE_ELF:-"$prg32_repo/build/PRG32.elf"}"}"
 architecture="${PRG32_ARCHITECTURE:-esp32c6}"
 portable="${PRG32_PORTABLE:-1}"
-game_tool="$prg32_repo/tools/prg32_game.py"
-
 build_args=()
 if [[ "$portable" == "1" || "$portable" == "true" || "$portable" == "yes" ]]; then
   build_args+=(--portable)
@@ -1411,21 +1410,22 @@ fi
 
 mkdir -p "$repo_dir/dist"
 
-python3 "$game_tool" build \
+(cd "$prg32_repo" && python3 -m prg32 cartridge build \
   "$repo_dir/src/debris.c" \
   --entry-prefix debris \
   --name debris \
+  --architecture "$architecture" \
   --out "$repo_dir/dist/debris-$architecture.raw.prg32" \
-  "${build_args[@]}"
+  "${build_args[@]}")
 
-python3 "$game_tool" attach-metadata \
+(cd "$prg32_repo" && python3 -m prg32 store attach-metadata \
   "$repo_dir/dist/debris-$architecture.raw.prg32" \
   --out "$repo_dir/dist/debris-$architecture.prg32" \
   --metadata "$repo_dir/metadata/metadata.json" \
   --icon "$repo_dir/assets/icon.png" \
   --screenshot "$repo_dir/assets/screenshot.png" \
   --colophon "$repo_dir/metadata/colophon.json" \
-  --architecture "$architecture"
+  --architecture "$architecture")
 
 echo "$repo_dir/dist/debris-$architecture.prg32"
 ```
@@ -1451,9 +1451,9 @@ cp "$repo_dir/assets/screenshot.png" "$stage_dir/screenshot.png"
 cp "$repo_dir/dist/debris-esp32c6.prg32" "$stage_dir/debris-esp32c6.prg32"
 cp "$repo_dir/dist/debris-qemu.prg32" "$stage_dir/debris-qemu.prg32"
 
-python3 "$prg32_repo/tools/prg32_game.py" pack-bundle \
+(cd "$prg32_repo" && python3 -m prg32 store pack-bundle \
   --manifest "$stage_dir/manifest.json" \
-  --out "$repo_dir/dist/debris-store-bundle.zip"
+  --out "$repo_dir/dist/debris-store-bundle.zip")
 
 echo "$repo_dir/dist/debris-store-bundle.zip"
 ```

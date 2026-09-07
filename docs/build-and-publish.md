@@ -26,7 +26,7 @@ The script writes `dist/debris-qemu.prg32`.
 ## Upload
 
 ```sh
-python3 "$PRG32_REPO/tools/prg32_game.py" upload \
+PYTHONPATH="$PRG32_REPO" python3 -m prg32 esp32c6 upload \
   dist/debris-esp32c6.prg32 \
   --url http://192.168.4.1
 ```
