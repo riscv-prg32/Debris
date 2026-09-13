@@ -2,6 +2,8 @@
 
 Debris uses the DeviceDemo cartridge template structure with the `debris`
 entry prefix and a single source file at `src/debris.c`.
+Builds target the portable ABI on current PRG32 `main`. Its short sound effects
+use the default portable audio instrument and timed notes.
 
 ## Build ESP32-C6
 
