@@ -68,14 +68,11 @@ static const int8_t shape[7][4][4][2] = {
     {{{0,0},{1,0},{1,1},{2,1}},{{2,0},{1,1},{2,1},{1,2}},{{0,1},{1,1},{1,2},{2,2}},{{1,0},{0,1},{1,1},{0,2}}},
 };
 
-static const uint8_t thump_sample[] = {
-    128, 210, 250, 238, 190, 134, 86, 54, 42, 50, 72, 100, 126, 145, 154, 154,
-    148, 138, 128, 121, 117, 118, 121, 125, 128, 128, 128, 128, 128, 128, 128, 128,
-};
-
-static const uint8_t crackle_sample[] = {
-    128, 240, 24, 210, 70, 186, 52, 225, 36, 172, 91, 235, 64, 154, 104, 202,
-    84, 170, 98, 190, 112, 160, 122, 145, 128, 138, 126, 132, 128, 128, 128, 128,
+/* Frequencies of MIDI notes C3 through C6, rounded to whole hertz. */
+static const uint16_t note_frequencies[] = {
+    131, 139, 147, 156, 165, 175, 185, 196, 208, 220, 233, 247,
+    262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494,
+    523, 554, 587, 622, 659, 698, 740, 784, 831, 880, 932, 988, 1047,
 };
 
 static void append_char(char *dst, int cap, int *pos, char ch) {
@@ -122,12 +119,23 @@ static uint32_t rnd(void) {
 
 static void sound_beep(int freq, int ms) {
     if (!g.audio_ready) return;
-    prg32_audio_beep(freq, ms);
+    size_t note = 0;
+    while (note + 1 < sizeof(note_frequencies) / sizeof(note_frequencies[0]) &&
+           freq > (note_frequencies[note] + note_frequencies[note + 1]) / 2) {
+        note++;
+    }
+    prg32_audio_note(0, PRG32_DEFAULT_INSTRUMENT_ID,
+                     (uint8_t)(48 + note), 190, (uint32_t)ms);
 }
 
-static void sound_sample(const uint8_t *sample, int len, int rate) {
+static void sound_thump(void) {
     if (!g.audio_ready) return;
-    prg32_audio_sample_u8(sample, (uint32_t)len, rate);
+    prg32_audio_note(1, PRG32_DEFAULT_INSTRUMENT_ID, 36, 220, 70);
+}
+
+static void sound_crackle(void) {
+    if (!g.audio_ready) return;
+    prg32_audio_note(1, PRG32_DEFAULT_INSTRUMENT_ID, 84, 180, 45);
 }
 
 static int fits(int piece, int rot, int x, int y) {
@@ -158,7 +166,7 @@ static void spawn(void) {
     if (!fits(g.piece, g.rot, g.x, g.y)) {
         g.state = STATE_GAME_OVER;
         submit_score_once();
-        sound_sample(crackle_sample, sizeof(crackle_sample), 11025);
+        sound_crackle();
     }
 }
 
@@ -214,7 +222,7 @@ static void clear_lines(void) {
     if (cleared > 0) {
         add_score(cleared, 0);
         g.clear_flash = 8;
-        sound_sample(crackle_sample, sizeof(crackle_sample), 15000);
+        sound_crackle();
         sound_beep(520 + cleared * 120, 65);
     }
 }
@@ -227,7 +235,7 @@ static void lock_piece(void) {
             g.board[py][px] = (uint8_t)(g.piece + 1);
         }
     }
-    sound_sample(thump_sample, sizeof(thump_sample), 9000);
+    sound_thump();
     clear_lines();
     spawn();
 }
